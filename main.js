@@ -234,9 +234,6 @@ Life = _.extends (Viewport, {
 		this.drawCellsShader.uniforms.transform.setMatrix (this.screenTransform)
 		this.drawCellsShader.uniforms.cells.bindTexture (this.cellBuffer, 0)
 		this.square.draw ()
-	},
-	noGL: function () {
-		$('.no-webgl').modal ('show')
 	}
 })
 

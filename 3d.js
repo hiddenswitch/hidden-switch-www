@@ -220,8 +220,6 @@ Viewport = _.prototype ({
 		if (this.gl) {
 			this.init ()
 			this.render ()
-		} else {
-			this.noGL ()
 		}
 	},
 	vertexBuffer: function (cfg) {
