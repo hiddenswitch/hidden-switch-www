@@ -79,68 +79,6 @@
 		    	}
 		    }
 		</script>
-		<script id="cell-copy-brush-fs" type="x-shader/x-fragment">
-			#version 100
-		    precision mediump float;
-		    varying vec2 fragmentPosition;
-		    uniform vec2 origin;
-		    uniform vec2 scale;
-		    uniform sampler2D source;
-		    void main (void) {
-		    	vec4 cell = texture2D (source, (fragmentPosition*scale + origin + 1.0) * 0.5);
-		        gl_FragColor = cell;
-		    }
-		</script>
-		<script id="cell-bake-brush-fs" type="x-shader/x-fragment">
-			#version 100
-		    precision mediump float;
-		    varying vec2 fragmentPosition;
-		    varying vec2 texCoord;
-		    uniform sampler2D cells;
-		    uniform sampler2D brush;
-		    uniform sampler2D rules;
-		    uniform vec2 screenSpace;
-		    uniform vec2 origin;
-		    uniform vec2 scale;
-		    uniform vec3 color;
-		    uniform bool animate;
-			vec4 pixelAt (vec2 offset) {
-		    	return texture2D (cells, texCoord + offset * screenSpace);
-		    }
-		    void main (void) {
-		    	vec4 cell = pixelAt (vec2 ( 0,  0));
-		    	if (animate) {
-			    	float neighbours =
-			    		(pixelAt (vec2 (-1.0, -1.0)) +
-			        	 pixelAt (vec2 ( 0.0, -1.0)) +
-			        	 pixelAt (vec2 ( 1.0, -1.0)) +
-			        	 pixelAt (vec2 ( 1.0,  0.0)) +
-			        	 pixelAt (vec2 ( 1.0,  1.0)) +
-			        	 pixelAt (vec2 ( 0.0,  1.0)) +
-			        	 pixelAt (vec2 (-1.0,  1.0)) +
-			        	 pixelAt (vec2 (-1.0,  0.0))).x;
-			    	vec4 decision = texture2D (rules, vec2 (neighbours / 16.0, 0.0));	
-			    	if (cell.x < 0.9 && decision.g > 0.0) {
-			    		cell = vec4 (1.0, 1.0, 0.0, 1.0);
-			    	} else if (cell.x > 0.0 && decision.r > 0.0) {
-			    		cell = vec4 (0.0, 1.0, cell.z, 1.0);
-			    	} else {
-			    		cell = cell * vec4 (1.0, 0.994, 1.0, 1.0);
-			    	}
-		    	}
-		    	vec2 texCoord = (((fragmentPosition - origin) / scale) + 1.0) * 0.5;
-		    	if (texCoord.x < 0.0 || texCoord.y < 0.0 || texCoord.x > 1.0 || texCoord.y > 1.0) {
-		    		gl_FragColor = cell;
-		    	} else {
-		        	vec4 srcCell = texture2D (brush, texCoord);
-		        	if (srcCell.x > 0.5) {
-		        		gl_FragColor = vec4 (color, 1.0); /* born */
-		        	} else {
-		        		gl_FragColor = cell;
-		        	}
-		        }
-		    }
-		</script>
 		<script id="cell-brush-fs" type="x-shader/x-fragment">
 			#version 100
 		    precision highp float;
@@ -247,16 +185,6 @@
 		    	}
 		    }
 		</script>
-		<script id="brush-selection-cursor-fs" type="x-shader/x-fragment">
-			#version 100
-		    precision mediump float;
-		    varying vec2 texCoord;
-		    uniform sampler2D color;
-		    void main (void) {
-		    	vec4 v = texture2D (color, texCoord);
-		    	gl_FragColor = vec4 (1.0 - v.x, 0.0, 1.0 - v.z, 1.0);
-		    }
-		</script>
 		<script id="simple-vs" type="x-shader/x-vertex">
 			#version 100
 			precision mediump float;
@@ -271,24 +199,6 @@
 	</head>
 	<body>
 		<div class="bar controls">
-			<span class="brush-settings round">
-				<span class="control-label" style="margin-right: 4px;">brush</span>
-				<div class="brush-scale slider"></div>
-				<div class="pattern-brush-scale slider"></div>
-				<div class="btn-group brush-type" data-toggle="buttons-radio">
-					<button
-						class="btn btn-inverse round"
-						data-brush-type="round"
-						title="<strong>shift</strong> to erase">round</button>
-					<button
-						class="btn btn-inverse noise active"
-						data-brush-type="noise">noise</button>
-					<button
-						class="btn btn-inverse pattern"
-						data-brush-type="pattern"
-						title="press <strong>ALT</strong> on keyboard to select pattern">pattern</button>
-				</div>
-			</span>
 			<span class="control-label">size X</span><div class="width slider"></div>
 			<span class="control-label">size Y</span><div class="height slider"></div>
 			<div class="btn-group">

@@ -33,29 +33,11 @@ Life = _.extends (Viewport, {
 				uniforms: ['cells', 'rules', 'brushPosition1', 'brushPosition2', 'brushSize', 'seed',
 					'pixelSpace', 'screenSpace', 'pixelOffset', 'noise', 'fill', 'animate']
 			}),
-			patternBrushShader: this.shaderProgram ({
-				vertex: 'cell-vs-pixeloffset',
-				fragment: 'cell-bake-brush-fs',
-				attributes: ['position'],
-				uniforms: ['brush', 'cells', 'rules', 'origin', 'scale', 'color', 'screenSpace', 'pixelOffset', 'animate']
-			}),
-			copyBrushShader: this.shaderProgram ({
-				vertex: 'cell-vs',
-				fragment: 'cell-copy-brush-fs',
-				attributes: ['position'],
-				uniforms: ['source', 'origin', 'scale']
-			}),
 			drawCellsShader: this.shaderProgram ({
 				vertex: 'simple-vs',
 				fragment: 'draw-cells-fs',
 				attributes: ['position'],
 				uniforms: ['cells', 'transform']
-			}),
-			brushCursorShader: this.shaderProgram ({
-				vertex: 'simple-vs',
-				fragment: 'brush-selection-cursor-fs',
-				attributes: ['position'],
-				uniforms: ['color', 'transform']
 			}),
 			/* square mesh */
 			square: this.vertexBuffer ({
@@ -77,14 +59,11 @@ Life = _.extends (Viewport, {
 			cellBuffer: null, 												// current
 			cellBuffer1: this.renderTexture ({ width: debug ? 512 : 1024, height: 512 }),	// back
 			cellBuffer2: this.renderTexture ({ width: debug ? 512 : 1024, height: 512 }),	// front
-			brushBuffer: this.renderTexture ({ width: 16, height: 16 }),	// clone stamp
 			/* transform matrices */
 			transform: new Transform (),
 			screenTransform: new Transform (),
 			/* changeable parameters */
 			brushSize: 16.0,
-			patternBrushScale: 1.0,
-			brushType: 'noise',
 			/* other stuff */
 			firstFrame: true
 		})
@@ -100,11 +79,9 @@ Life = _.extends (Viewport, {
 	},
 	initUserInput: function () {
 		$(this.canvas).mousewheel ($.proxy (this.onZoom, this))
-		$(this.canvas).mousedown ($.proxy (function (e) {
+		$(this.canvas).mouseenter ($.proxy (function (e) {
 			if (!e.button) {
-				if (!this.isCloning) {
-					this.onPaintStart (e)
-				}
+				this.onPaintStart (e)
 			} else {
 				this.onDragStart (e)
 			}
@@ -112,21 +89,6 @@ Life = _.extends (Viewport, {
 		$(this.canvas).bind ('contextmenu', function (e) {
 			e.preventDefault ()
 		})
-		$(this.canvas).mousemove ($.proxy (function (e) {
-			this.cloneStampPosition = this.eventPoint (e)
-		}, this))
-		$(window).keydown ($.proxy (function (e) {
-			switch (e.keyCode) {
-				case 18: /* alt */
-					if (!this.isPainting) {
-						this.onCloneStart (e);
-					}
-					break;
-				case 82: /* r */ this.setBrushType ('round'); break;
-				case 78: /* n */ this.setBrushType ('noise'); break;
-				case 27: /* esc */ this.reset ('nothing'); break;
-			}
-		}, this))
 		$(window).resize ($.proxy (function () {
 			var container = $('.viewport-container')
 			var width = container.width (),
@@ -146,29 +108,15 @@ Life = _.extends (Viewport, {
 			.slider ('.controls .height', { min: 9, max: 13, value: 9 }, function (value) {
 				this.resizeBuffers (this.cellBuffer.width, Math.pow (2, value))
 			})
-			.slider ('.controls .brush-scale', { min: 0, max: 10, value: 4, step: 0.1 }, function (value, slider) {
-				this.brushSize = Math.pow (2, value)
-			})
-			.slider ('.controls .pattern-brush-scale', { min: 0, max: 7, value: 0, step: 0.1 }, function (value, slider) {
-				this.patternBrushScale = Math.pow (2, value)
-			})
 		$('.reset')
 			.click ($.proxy (function (e) {
 				this.reset ($(e.target).attr ('data-reset-with'))
-			}, this))
-		$('.brush-type .btn')
-			.click ($.proxy (function (e) {
-				this.setBrushType ($(e.target).attr ('data-brush-type'))
 			}, this))
 		$('.btn')
 			.tooltip ({
 				placement: 'bottom',
 				trigger: 'hover'
 			})
-		$('.brush-type .pattern').tooltip ('destroy').tooltip ({
-			placement: 'bottom',
-			trigger: 'click'
-		})
 		$('.btn-rules').click (function () {
 			$('.rules-editor').toggle ()
 		})
@@ -207,15 +155,6 @@ Life = _.extends (Viewport, {
 				handler.call (this, ui.value, el)
 			}, this))
 		return this
-	},
-	setBrushType: function (type) {
-		this.brushType = type
-		$('.brush-type .btn').removeClass ('active')
-		$('.brush-type .' + type).addClass ('active')
-		$('.brush-settings').attr ('class', 'brush-settings ' + type)
-		if (type != 'pattern') {
-			$('.brush-type .pattern').tooltip ('hide')
-		}
 	},
 	resizeBuffers: function (w, h) {
 		this.cellBuffer1.resize (w, h)
@@ -295,23 +234,6 @@ Life = _.extends (Viewport, {
 			$(window).unbind ('mousemove')
 		}, this))
 	},
-	onCloneStart: function (e) {
-		$('.brush-type .pattern').tooltip ('hide')
-		this.setBrushType ('pattern')
-		this.isCloning = true
-		var zoom = Math.max (1, this.getZoom ())
-		var size = Math.min (this.viewportWidth / zoom, this.viewportHeight / zoom)
-		var npot = Math.max (8, Math.pow (2, Math.floor (Math.log2 (size)) - 1))
-		this.brushBuffer.resize (npot, npot)
-		$(window).mousemove ($.proxy (function (e) {
-			this.cloneStampPosition = this.eventPoint (e)
-		}, this))
-		$(window).keyup ($.proxy (function () {
-			this.isCloning = false
-			$(window).unbind ('keyup')
-			$(window).unbind ('mousemove')
-		}, this))
-	},
 	fillWithRandomNoise: function () {
 		this.cellBuffer.draw (function () {
 			this.randomNoiseShader.use ()
@@ -369,9 +291,6 @@ Life = _.extends (Viewport, {
 		} else {
 			this.iterate ()
 		}
-		if (this.isCloning) {
-			this.updateBrushBuffer ()
-		}
 		this.springDynamics ()
 	},
 	renderCells: function (callback) {
@@ -395,32 +314,9 @@ Life = _.extends (Viewport, {
 		})
 	},
 	paint: function (animate) {
-		if (this.brushType == 'pattern' && this.brushBufferReady) {
-			this.paintBrushBuffer (animate)
-		} else {
-			this.paintParametricBrush (animate)
-		}
+		this.paintParametricBrush (animate)
 		this.paintFrom = this.paintTo
 		this.shouldPaint = false
-	},
-	paintBrushBuffer: function (animate) {
-		this.renderCells (function () {
-			this.patternBrushShader.use ()
-			this.patternBrushShader.attributes.position.bindBuffer (this.square)
-			this.patternBrushShader.uniforms.cells.bindTexture (this.cellBuffer, 0)
-			this.patternBrushShader.uniforms.rules.bindTexture (this.rulesBuffer, 1)
-			this.patternBrushShader.uniforms.brush.bindTexture (this.brushBuffer, 2)
-			this.patternBrushShader.uniforms.pixelOffset.set2f (0.0,
-				animate ? (-0.5 / this.cellBuffer.height) : 0.0)
-			this.patternBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
-			this.patternBrushShader.uniforms.color.set3fv (this.eraseMode ? vec3.create ([0,0,0]) : vec3.create ([1,1,1]))
-			this.patternBrushShader.uniforms.origin.set2fv (this.screenTransform.applyInverse (this.paintTo))
-			this.patternBrushShader.uniforms.animate.set1i (animate ? 1 : 0)
-			this.patternBrushShader.uniforms.scale.set2f (
-				(this.brushBuffer.width / this.cellBuffer.width) * this.patternBrushScale,
-				(this.brushBuffer.height / this.cellBuffer.height) * this.patternBrushScale)
-			this.square.draw ()
-		})
 	},
 	paintParametricBrush: function (animate) {
 		this.renderCells (function () {
@@ -442,24 +338,11 @@ Life = _.extends (Viewport, {
 			this.parametricBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
 			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize))
 			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ())
-			this.parametricBrushShader.uniforms.noise.set1i (this.brushType == 'noise')
+			this.parametricBrushShader.uniforms.noise.set1i (1.0)
 			this.parametricBrushShader.uniforms.fill.set1f (this.eraseMode ? 0.0 : 1.0)
 			this.parametricBrushShader.uniforms.animate.set1i (animate ? 1 : 0)
 		    this.square.draw ()
 		})
-	},
-	updateBrushBuffer: function () {
-		this.brushBuffer.draw (function () {
-			this.copyBrushShader.use ()
-			this.copyBrushShader.attributes.position.bindBuffer (this.square)
-			this.copyBrushShader.uniforms.source.bindTexture (this.cellBuffer, 0)
-			this.copyBrushShader.uniforms.origin.set2fv (this.screenTransform.applyInverse (this.cloneStampPosition))
-			this.copyBrushShader.uniforms.scale.set2f (
-				this.brushBuffer.width / this.cellBuffer.width,
-				this.brushBuffer.height / this.cellBuffer.height)
-		    this.square.draw ()
-			this.brushBufferReady = true;
-		}, this)
 	},
 	draw: function () {
 		this.gl.disable (this.gl.DEPTH_TEST)
@@ -469,19 +352,6 @@ Life = _.extends (Viewport, {
 		this.drawCellsShader.uniforms.transform.setMatrix (this.screenTransform)
 		this.drawCellsShader.uniforms.cells.bindTexture (this.cellBuffer, 0)
 		this.square.draw ()
-		this.drawCloneStamp ()
-	},
-	drawCloneStamp: function () {
-		if (this.isCloning) {
-			this.brushCursorShader.use ()
-			this.brushCursorShader.attributes.position.bindBuffer (this.square)
-			this.brushCursorShader.uniforms.transform.setMatrix (new Transform ()
-				.translate (this.cloneStampPosition)
-				.scale ([this.brushBuffer.width / this.cellBuffer.width, this.brushBuffer.height / this.cellBuffer.height, 0.0])
-				.multiply (this.screenTransform))
-			this.brushCursorShader.uniforms.color.bindTexture (this.brushBuffer, 0)
-			this.square.draw ()
-		}
 	},
 	noGL: function () {
 		$('.no-webgl').modal ('show')
