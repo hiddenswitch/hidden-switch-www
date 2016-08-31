@@ -117,14 +117,15 @@ Life = _.extends (Viewport, {
 	onDragStart: function (e) {
 		this.isDragging = true
 		var origin = this.transform.applyInverse (this.eventPoint (e))
-		$(window).mousemove ($.proxy (function (e) {
+		var onMousemove = $.proxy (function (e) {
 			var point = this.transform.applyInverse (this.eventPoint (e))
 			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
-		}, this))
+		}, this);
+		$(window).mousemove (onMousemove)
 		$(window).mouseup ($.proxy (function () {
 			this.isDragging = false
 			$(window).unbind ('mouseup')
-			$(window).unbind ('mousemove')
+			$(window).unbind ('mousemove', onMousemove)
 		}, this))
 	},
 	onPaintStart: function (e) {
@@ -132,10 +133,14 @@ Life = _.extends (Viewport, {
 		this.eraseMode = e.shiftKey
 		this.shouldPaint = true
 		this.isPainting = true
-		$(window).mousemove ($.proxy (function (e) {
+		var onMousemove = $.proxy (function (e) {
 			this.paintTo = this.eventPoint (e)
 			this.eraseMode = e.shiftKey
 			this.shouldPaint = true
+		}, this)
+		$(this.canvas).mousemove (onMousemove)
+		$(this.canvas).mouseleave ($.proxy (function (e) {
+			$(this.canvas).unbind ('mousemove', onMousemove)
 		}, this))
 	},
 	fillWithRandomNoise: function () {
