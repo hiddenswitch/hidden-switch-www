@@ -73,6 +73,9 @@ Life = _.extends (Viewport, {
 		$(this.canvas).mouseenter ($.proxy (function (e) {
 			this.onPaintStart (e)
 		}, this))
+		$(this.canvas).mousedown ($.proxy (function (e) {
+			this.onDragStart (e)
+		}, this))
 		$(window).resize ($.proxy (function () {
 			var container = $('.viewport-container')
 			var width = container.width (),
@@ -110,6 +113,19 @@ Life = _.extends (Viewport, {
 		return vec3.length (vec3.subtract (
 				this.transform.apply ([0, 0, 0]),
 				this.transform.apply ([1, 0, 0])))
+	},
+	onDragStart: function (e) {
+		this.isDragging = true
+		var origin = this.transform.applyInverse (this.eventPoint (e))
+		$(window).mousemove ($.proxy (function (e) {
+			var point = this.transform.applyInverse (this.eventPoint (e))
+			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
+		}, this))
+		$(window).mouseup ($.proxy (function () {
+			this.isDragging = false
+			$(window).unbind ('mouseup')
+			$(window).unbind ('mousemove')
+		}, this))
 	},
 	onPaintStart: function (e) {
 		this.paintFrom = this.paintTo = this.eventPoint (e)
