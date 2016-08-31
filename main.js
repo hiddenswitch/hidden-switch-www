@@ -175,9 +175,6 @@ Life = _.extends (Viewport, {
 			placement: 'bottom',
 			trigger: 'click'
 		})
-		$('.btn-info').click (function () {
-			$('.modal.info').modal ('show')
-		})
 		$('.btn-rules').click (function () {
 			$('.rules-editor').toggle ()
 		})
