@@ -12,12 +12,6 @@ Life = _.extends (Viewport, {
 				attributes: ['position'],
 				uniforms: ['seed']
 			}),
-			updateFromBitmapShader: this.shaderProgram ({
-				vertex: 'cell-vs',
-				fragment: 'cell-update-from-bitmap-fs',
-				attributes: ['position'],
-				uniforms: ['source']
-			}),
 			iterationShader: this.shaderProgram ({
 				vertex: 'cell-vs-pixeloffset',
 				fragment: 'cell-iteration-fs',
@@ -77,15 +71,8 @@ Life = _.extends (Viewport, {
 	initUserInput: function () {
 		$(this.canvas).mousewheel ($.proxy (this.onZoom, this))
 		$(this.canvas).mouseenter ($.proxy (function (e) {
-			if (!e.button) {
-				this.onPaintStart (e)
-			} else {
-				this.onDragStart (e)
-			}
+			this.onPaintStart (e)
 		}, this))
-		$(this.canvas).bind ('contextmenu', function (e) {
-			e.preventDefault ()
-		})
 		$(window).resize ($.proxy (function () {
 			var container = $('.viewport-container')
 			var width = container.width (),
@@ -97,28 +84,12 @@ Life = _.extends (Viewport, {
 			}
 		}, this)).resize ()
 	},
-	slider: function (selector, cfg, handler) {
-		var el = $(selector)
-		el.slider (cfg)
-			.bind ('slide', $.proxy (function (e, ui) {
-				handler.call (this, ui.value, el)
-				el.find ('.ui-slider-handle').blur () /* do not want focus */
-			}, this))
-			.bind ('change', $.proxy (function (e, ui) {
-				/* FIXME: change event does not fire ?? */
-				handler.call (this, ui.value, el)
-			}, this))
-		return this
-	},
 	resizeBuffers: function (w, h) {
 		this.cellBuffer1.resize (w, h)
 		this.cellBuffer2.resize (w, h)
 		$(window).resize ()
-		this.reset ('noise')
-		this.updateTransform (new Transform ())
-	},
-	reset: function (type) {
 		this.fillWithRandomNoise ()
+		this.updateTransform (new Transform ())
 	},
 	eventPoint: function (e) {
 		var offset = $(this.canvas).offset ()
@@ -140,19 +111,6 @@ Life = _.extends (Viewport, {
 				this.transform.apply ([0, 0, 0]),
 				this.transform.apply ([1, 0, 0])))
 	},
-	onDragStart: function (e) {
-		this.isDragging = true
-		var origin = this.transform.applyInverse (this.eventPoint (e))
-		$(window).mousemove ($.proxy (function (e) {
-			var point = this.transform.applyInverse (this.eventPoint (e))
-			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
-		}, this))
-		$(window).mouseup ($.proxy (function () {
-			this.isDragging = false
-			$(window).unbind ('mouseup')
-			$(window).unbind ('mousemove')
-		}, this))
-	},
 	onPaintStart: function (e) {
 		this.paintFrom = this.paintTo = this.eventPoint (e)
 		this.eraseMode = e.shiftKey
@@ -163,11 +121,6 @@ Life = _.extends (Viewport, {
 			this.eraseMode = e.shiftKey
 			this.shouldPaint = true
 		}, this))
-		$(window).mouseup ($.proxy (function () {
-			this.isPainting = false
-			$(window).unbind ('mouseup')
-			$(window).unbind ('mousemove')
-		}, this))
 	},
 	fillWithRandomNoise: function () {
 		this.cellBuffer.draw (function () {
@@ -177,12 +130,6 @@ Life = _.extends (Viewport, {
 			this.square.draw ()
 		}, this)
 		this.firstFrame = true
-	},
-	fillWithNothing: function () {
-		this.cellBuffer.draw (function () {
-			this.gl.clearColor (0.0, 0.0, 0.0, 1.0)
-			this.gl.clear (this.gl.COLOR_BUFFER_BIT)
-		}, this)
 	},
 	springDynamics: function () {
 		var zoom = this.getZoom ()

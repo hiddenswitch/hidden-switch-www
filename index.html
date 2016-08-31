@@ -36,18 +36,6 @@
 		        gl_FragColor = vec4 (noise, 1, 0, 1);
 		    }
 		</script>
-		<script id="cell-update-from-bitmap-fs" type="x-shader/x-fragment">
-			#version 100
-		    precision mediump float;
-		    varying vec2 texCoord;
-		    uniform sampler2D source;
-		    void main (void) {
-		    	vec4 sourceColor = texture2D (source, texCoord);
-		    	float sum = (sourceColor.r + sourceColor.g + sourceColor.b) / 3.0;
-		    	float alive = sum < 0.5 ? 1.0 : 0.0;
-		        gl_FragColor = vec4 (alive, alive, 0.0, 1.0);
-		    }
-		</script>
 		<script id="cell-iteration-fs" type="x-shader/x-fragment">
 			#version 100
 		    precision highp float;
@@ -69,7 +57,7 @@
 		        	 pixelAt (vec2 ( 0.0,  1.0)) +
 		        	 pixelAt (vec2 (-1.0,  1.0)) +
 		        	 pixelAt (vec2 (-1.0,  0.0))).x;
-		    	vec4 decision = texture2D (rules, vec2 (neighbours / 16.0, 0.0));	
+		    	vec4 decision = texture2D (rules, vec2 (neighbours / 16.0, 0.0));
 		    	if (cell.x < 0.9 && decision.g > 0.0) {
 		    		gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
 		    	} else if (cell.x > 0.0 && decision.r > 0.0) {
@@ -129,7 +117,7 @@
 				        	 pixelAt (vec2 ( 0.0,  1.0)) +
 				        	 pixelAt (vec2 (-1.0,  1.0)) +
 				        	 pixelAt (vec2 (-1.0,  0.0))).x;
-				    	vec4 decision = texture2D (rules, vec2 (neighbours / 16.0, 0.0));	
+				    	vec4 decision = texture2D (rules, vec2 (neighbours / 16.0, 0.0));
 				    	if (cell.x < 0.9 && decision.g > 0.0) {
 				    		cell = vec4 (1.0, 1.0, 0.0, 1.0);
 				    	} else if (cell.x > 0.0 && decision.r > 0.0) {
