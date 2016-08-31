@@ -82,7 +82,6 @@ Life = _.extends (Viewport, {
 			transform: new Transform (),
 			screenTransform: new Transform (),
 			/* changeable parameters */
-			scrollSpeed: debug ? 0.0 : 2.0,
 			brushSize: 16.0,
 			patternBrushScale: 1.0,
 			paused: false,
@@ -127,7 +126,7 @@ Life = _.extends (Viewport, {
 				case 82: /* r */ this.setBrushType ('round'); break;
 				case 78: /* n */ this.setBrushType ('noise'); break;
 				case 32: /* space */ this.paused = !this.paused; break;
-				case 27: /* esc */ this.reset ('nothing'); $('.controls .scroll-speed').slider ('value', this.scrollSpeed = 0); break;
+				case 27: /* esc */ this.reset ('nothing'); break;
 			}
 		}, this))
 		$(window).resize ($.proxy (function () {
@@ -149,9 +148,6 @@ Life = _.extends (Viewport, {
 			.slider ('.controls .height', { min: 9, max: 13, value: 9 }, function (value) {
 				this.resizeBuffers (this.cellBuffer.width, Math.pow (2, value))
 			})
-			.slider ('.controls .scroll-speed', { min: 0, max: 6, value: 1 }, function (value) {
-				this.scrollSpeed = value*2
-			})
 			.slider ('.controls .brush-scale', { min: 0, max: 10, value: 4, step: 0.1 }, function (value, slider) {
 				this.brushSize = Math.pow (2, value)
 			})
@@ -161,7 +157,6 @@ Life = _.extends (Viewport, {
 		$('.reset')
 			.click ($.proxy (function (e) {
 				this.reset ($(e.target).attr ('data-reset-with'))
-				$('.controls .scroll-speed').slider ('value', this.scrollSpeed = 0)
 			}, this))
 		$('.brush-type .btn')
 			.click ($.proxy (function (e) {
@@ -170,10 +165,6 @@ Life = _.extends (Viewport, {
 		$('.btn-pause')
 			.click ($.proxy (function (e) {
 				this.paused = !this.paused
-			}, this))
-		$('.btn-scroll')
-			.click ($.proxy (function (e) {
-				this.enableScroll (!(this.scrollSpeed > 0.0))
 			}, this))
 		$('.btn')
 			.tooltip ({
@@ -212,10 +203,6 @@ Life = _.extends (Viewport, {
 		born = $('<button class="btn">born</button>').click (function () { updateUI (2); commit (2); }).appendTo (buttons)
 		updateUI (this.rules[at])
 		return rule
-	},
-	enableScroll: function (enable) {
-		this.scrollSpeed = enable ? 2.0 : 0.0
-		$('.btn-scroll').toggleClass ('yes', enable)
 	},
 	slider: function (selector, cfg, handler) {
 		var el = $(selector)
@@ -416,7 +403,7 @@ Life = _.extends (Viewport, {
 			this.iterationShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
 			this.iterationShader.uniforms.pixelOffset.set2f (
 				0.0 / this.cellBuffer.width,
-				-(0.5 + this.scrollSpeed * !this.firstFrame) / this.cellBuffer.height)
+				-0.5 / this.cellBuffer.height)
 		    this.square.draw ()
 		})
 	},
@@ -437,7 +424,7 @@ Life = _.extends (Viewport, {
 			this.patternBrushShader.uniforms.rules.bindTexture (this.rulesBuffer, 1)
 			this.patternBrushShader.uniforms.brush.bindTexture (this.brushBuffer, 2)
 			this.patternBrushShader.uniforms.pixelOffset.set2f (0.0,
-				animate ? (-(0.5 + this.scrollSpeed * !this.firstFrame) / this.cellBuffer.height) : 0.0)
+				animate ? (-0.5 / this.cellBuffer.height) : 0.0)
 			this.patternBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
 			this.patternBrushShader.uniforms.color.set3fv (this.eraseMode ? vec3.create ([0,0,0]) : vec3.create ([1,1,1]))
 			this.patternBrushShader.uniforms.origin.set2fv (this.screenTransform.applyInverse (this.paintTo))
@@ -464,7 +451,7 @@ Life = _.extends (Viewport, {
 			this.parametricBrushShader.uniforms.brushPosition2.set2fv (this.screenTransform.applyInverse (this.paintTo))
 			this.parametricBrushShader.uniforms.pixelSpace.setMatrix (pixelSpace)
 			this.parametricBrushShader.uniforms.pixelOffset.set2f (0.0,
-				animate ? (-(0.5 + this.scrollSpeed * !this.firstFrame) / this.cellBuffer.height) : 0.0)
+				animate ? (-0.5 / this.cellBuffer.height) : 0.0)
 			this.parametricBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
 			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize))
 			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ())
