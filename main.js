@@ -84,7 +84,6 @@ Life = _.extends (Viewport, {
 			/* changeable parameters */
 			brushSize: 16.0,
 			patternBrushScale: 1.0,
-			paused: false,
 			brushType: 'noise',
 			/* other stuff */
 			firstFrame: true
@@ -125,7 +124,6 @@ Life = _.extends (Viewport, {
 					break;
 				case 82: /* r */ this.setBrushType ('round'); break;
 				case 78: /* n */ this.setBrushType ('noise'); break;
-				case 32: /* space */ this.paused = !this.paused; break;
 				case 27: /* esc */ this.reset ('nothing'); break;
 			}
 		}, this))
@@ -161,10 +159,6 @@ Life = _.extends (Viewport, {
 		$('.brush-type .btn')
 			.click ($.proxy (function (e) {
 				this.setBrushType ($(e.target).attr ('data-brush-type'))
-			}, this))
-		$('.btn-pause')
-			.click ($.proxy (function (e) {
-				this.paused = !this.paused
 			}, this))
 		$('.btn')
 			.tooltip ({
@@ -370,14 +364,10 @@ Life = _.extends (Viewport, {
 		this.screenTransform = this.transform.multiply (viewportTransform)
 	},
 	beforeDraw: function () {
-		if (!this.paused) {
-			if (this.shouldPaint) {
-				this.paint (true)
-			} else {
-				this.iterate ()
-			}
-		} else if (this.shouldPaint) {
-			this.paint (false)
+		if (this.shouldPaint) {
+			this.paint (true)
+		} else {
+			this.iterate ()
 		}
 		if (this.isCloning) {
 			this.updateBrushBuffer ()
