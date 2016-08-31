@@ -2,8 +2,6 @@
  * Licensed under:	MIT
  */
 
-var debug = false
-
 Life = _.extends (Viewport, {
 	init: function () {
 		_.extend (this, {
@@ -57,8 +55,8 @@ Life = _.extends (Viewport, {
 			}),
 			/* buffers */
 			cellBuffer: null, 												// current
-			cellBuffer1: this.renderTexture ({ width: debug ? 512 : 1024, height: 512 }),	// back
-			cellBuffer2: this.renderTexture ({ width: debug ? 512 : 1024, height: 512 }),	// front
+			cellBuffer1: this.renderTexture ({ width: 1024, height: 512 }),	// back
+			cellBuffer2: this.renderTexture ({ width: 1024, height: 512 }),	// front
 			/* transform matrices */
 			transform: new Transform (),
 			screenTransform: new Transform (),
@@ -70,7 +68,6 @@ Life = _.extends (Viewport, {
 		this.cellBuffer = this.cellBuffer1
 		this.fillWithRandomNoise ()
 		this.initUserInput ()
-		this.initGUI ()
 	},
 	genRulesBufferData: function (input) {
 		return new Uint8Array (_.flatten (_.map (input, function (i) {
@@ -100,24 +97,6 @@ Life = _.extends (Viewport, {
 			}
 		}, this)).resize ()
 	},
-	initGUI: function () {
-		this
-			.slider ('.controls .width', { min: 9, max: 13, value: 10 }, function (value) {
-				this.resizeBuffers (Math.pow (2, value), this.cellBuffer.height)
-			})
-			.slider ('.controls .height', { min: 9, max: 13, value: 9 }, function (value) {
-				this.resizeBuffers (this.cellBuffer.width, Math.pow (2, value))
-			})
-		$('.reset')
-			.click ($.proxy (function (e) {
-				this.reset ($(e.target).attr ('data-reset-with'))
-			}, this))
-		$('.btn')
-			.tooltip ({
-				placement: 'bottom',
-				trigger: 'hover'
-			})
-	},
 	slider: function (selector, cfg, handler) {
 		var el = $(selector)
 		el.slider (cfg)
@@ -139,26 +118,7 @@ Life = _.extends (Viewport, {
 		this.updateTransform (new Transform ())
 	},
 	reset: function (type) {
-		if (type == 'noise') {
-			this.fillWithRandomNoise ()
-		} else if (type == 'turing') {
-			$('.modal-overlay.loading').fadeIn (200)
-			this.resizeBuffers (2048, 2048)
-			var image = new Image ();
-  			image.onload = $.proxy (function () {
-  				this.cellBuffer.updateFromImage (image)
-  				this.cellBuffer.draw (function () {
-					this.updateFromBitmapShader.use ()
-					this.updateFromBitmapShader.attributes.position.bindBuffer (this.square)
-					this.updateFromBitmapShader.uniforms.source.bindTexture (this.cellBuffer)
-					this.square.draw ()
-				}, this)
-				$('.modal-overlay.loading').fadeOut (200)
-  			}, this)
-			image.src = 'turing-machine.png';
-		} else {
-			this.fillWithNothing ()
-		}
+		this.fillWithRandomNoise ()
 	},
 	eventPoint: function (e) {
 		var offset = $(this.canvas).offset ()
