@@ -117,31 +117,6 @@ Life = _.extends (Viewport, {
 				placement: 'bottom',
 				trigger: 'hover'
 			})
-		$('.btn-rules').click (function () {
-			$('.rules-editor').toggle ()
-		})
-		for (var i = 0; i <= 8; i++) {
-			$('.rules-editor').append (this.ruleUI (i))
-		}
-	},
-	ruleUI: function (at) {
-		var rule = $('<div class="rule">').append ($('<span class="count">' + at + ':</span>'))
-		var buttons = $('<div class="btn-group" data-toggle="buttons-radio">').appendTo (rule)
-		var die, keep, born
-		var updateUI = function (value) {
-			die.attr ('class', 'btn ' + (value == 0 ? 'active btn-danger' : 'btn-inverse'))
-			keep.attr ('class', 'btn ' + (value == 1 ? 'active btn-info' : 'btn-inverse'))
-			born.attr ('class', 'btn ' + (value == 2 ? 'active btn-success' : 'btn-inverse'))
-		}
-		var commit = $.proxy (function (value) {
-			this.rules[at] = value
-			this.rulesBuffer.update (this.genRulesBufferData (this.rules))
-		}, this)
-		die = $('<button class="btn">die</button>').click (function () { updateUI (0); commit (0); }).appendTo (buttons)
-		keep = $('<button class="btn">keep</button>').click (function () { updateUI (1); commit (1); }).appendTo (buttons)
-		born = $('<button class="btn">born</button>').click (function () { updateUI (2); commit (2); }).appendTo (buttons)
-		updateUI (this.rules[at])
-		return rule
 	},
 	slider: function (selector, cfg, handler) {
 		var el = $(selector)
