@@ -71,7 +71,7 @@ Life = _.extends (Viewport, {
 	},
 	initUserInput: function () {
 		$(this.canvas).mousewheel ($.proxy (this.onZoom, this))
-		$(this.canvas).mouseenter ($.proxy (function (e) {
+		$(this.canvas).bind('mouseenter touchstart', $.proxy (function (e) {
 			this.onPaintStart (e)
 		}, this))
 		$(this.canvas).mousedown ($.proxy (function (e) {
@@ -97,9 +97,11 @@ Life = _.extends (Viewport, {
 	},
 	eventPoint: function (e) {
 		var offset = $(this.canvas).offset ()
+		var clientX = e.clientX || e.originalEvent.touches[0].clientX
+		var clientY = e.clientY || e.originalEvent.touches[0].clientY
 		return [
-			(e.clientX - offset.left) / (this.viewportWidth * 0.5) - 1.0,
-			(offset.top - e.clientY) / (this.viewportHeight * 0.5) + 1.0, 0.0]
+			(clientX - offset.left) / (this.viewportWidth * 0.5) - 1.0,
+			(offset.top - clientY) / (this.viewportHeight * 0.5) + 1.0, 0.0]
 	},
 	onZoom: function (e) {
 		var zoom = Math.pow (1.03, e.originalEvent.wheelDelta ?
@@ -124,12 +126,13 @@ Life = _.extends (Viewport, {
 			var point = this.transform.applyInverse (this.eventPoint (e))
 			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
 		}, this);
-		$(window).mousemove (onMousemove)
-		$(window).mouseup ($.proxy (function () {
+		$(window).bind('mousemove touchmove', onMousemove)
+		var onMouseup = $.proxy (function () {
 			this.isDragging = false
-			$(window).unbind ('mouseup')
-			$(window).unbind ('mousemove', onMousemove)
-		}, this))
+			$(window).unbind ('mouseup touchend', onMouseup)
+			$(window).unbind ('mousemove touchmove', onMousemove)
+		}, this)
+		$(window).bind('mouseup touchend', onMouseup)
 	},
 	onPaintStart: function (e) {
 		this.paintFrom = this.paintTo = this.eventPoint (e)
@@ -141,9 +144,9 @@ Life = _.extends (Viewport, {
 			this.eraseMode = e.shiftKey
 			this.shouldPaint = true
 		}, this)
-		$(this.canvas).mousemove (onMousemove)
-		$(this.canvas).mouseleave ($.proxy (function (e) {
-			$(this.canvas).unbind ('mousemove', onMousemove)
+		$(this.canvas).bind('mousemove touchmove', onMousemove)
+		$(this.canvas).bind('mouseleave touchend', $.proxy (function (e) {
+			$(this.canvas).unbind ('mousemove touchmove', onMousemove)
 		}, this))
 	},
 	fillWithRandomNoise: function () {
