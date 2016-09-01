@@ -4,6 +4,8 @@
 
 Life = _.extends (Viewport, {
 	init: function () {
+		var bufferWidth = Math.min(1024, Math.pow(2, Math.ceil(Math.log2(window.innerWidth))))
+		var bufferHeight = Math.min(512, Math.pow(2, Math.ceil(Math.log2(window.innerHeight))))
 		_.extend (this, {
 			/* shaders */
 			randomNoiseShader: this.shaderProgram ({
@@ -49,8 +51,8 @@ Life = _.extends (Viewport, {
 			}),
 			/* buffers */
 			cellBuffer: null, 												// current
-			cellBuffer1: this.renderTexture ({ width: 1024, height: 512 }),	// back
-			cellBuffer2: this.renderTexture ({ width: 1024, height: 512 }),	// front
+			cellBuffer1: this.renderTexture ({ width: bufferWidth, height: bufferHeight }),	// back
+			cellBuffer2: this.renderTexture ({ width: bufferWidth, height: bufferHeight }),	// front
 			/* transform matrices */
 			transform: new Transform (),
 			screenTransform: new Transform (),
