@@ -56,6 +56,7 @@ Life = _.extends (Viewport, {
 			screenTransform: new Transform (),
 			/* changeable parameters */
 			brushSize: 16.0,
+			maxZoom: 8.0,
 			/* other stuff */
 			firstFrame: true
 		})
@@ -104,10 +105,12 @@ Life = _.extends (Viewport, {
 		var zoom = Math.pow (1.03, e.originalEvent.wheelDelta ?
 			(e.originalEvent.wheelDelta / (navigator.platform == 'MacIntel' ? 360.0 : 36.0)) : -e.originalEvent.detail)
 		var origin = this.transform.applyInverse (this.eventPoint (e))
-		this.updateTransform (this.transform.multiply (new Transform ()
-			.translate (origin)
-			.scale ([zoom, zoom, 1.0])
-			.translate ([-origin[0], -origin[1], 0.0])))
+		if (zoom < 1 || this.getZoom() < this.maxZoom) {
+			this.updateTransform (this.transform.multiply (new Transform ()
+				.translate (origin)
+				.scale ([zoom, zoom, 1.0])
+				.translate ([-origin[0], -origin[1], 0.0])))
+		}
 	},
 	getZoom: function () {
 		return vec3.length (vec3.subtract (
