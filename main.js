@@ -75,7 +75,9 @@ Life = _.extends (Viewport, {
 			this.onPaintStart (e)
 		}, this))
 		$(this.canvas).mousedown ($.proxy (function (e) {
-			this.onDragStart (e)
+			if (e.which === 1) {
+				this.onDragStart (e)
+			}
 		}, this))
 		$(window).resize ($.proxy (function () {
 			var container = $('.viewport-container')
