@@ -90,8 +90,8 @@ Life = _.extends (Viewport, {
 	},
 	eventPoint: function (e) {
 		var offset = $(this.canvas).offset ()
-		var clientX = e.clientX || e.originalEvent.touches[0].clientX
-		var clientY = e.clientY || e.originalEvent.touches[0].clientY
+		var clientX = e.clientX || (e.originalEvent.touches && e.originalEvent.touches[0].clientX)
+		var clientY = e.clientY || (e.originalEvent.touches && e.originalEvent.touches[0].clientY)
 		return [
 			(clientX - offset.left) / (this.viewportWidth * 0.5) - 1.0,
 			(offset.top - clientY) / (this.viewportHeight * 0.5) + 1.0, 0.0]
