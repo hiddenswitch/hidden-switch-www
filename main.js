@@ -92,13 +92,6 @@ Life = _.extends (Viewport, {
 			}
 		}, this)).resize ()
 	},
-	resizeBuffers: function (w, h) {
-		this.cellBuffer1.resize (w, h)
-		this.cellBuffer2.resize (w, h)
-		$(window).resize ()
-		this.fillWithRandomNoise ()
-		this.updateTransform (new Transform ())
-	},
 	eventPoint: function (e) {
 		var offset = $(this.canvas).offset ()
 		var clientX = e.clientX || e.originalEvent.touches[0].clientX
