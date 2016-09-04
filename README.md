@@ -1,5 +1,3 @@
-Check for new version:
+Conway’s Game of Life
 
-# [New version with colors](https://github.com/xpl/expression/)
-
-# [LIVE DEMO (of new version)](http://xpl.github.io/expression/)
+Modified version of [xpl/life](https://github.com/xpl/life) to make a spiffy background that is touchable on mobile.
