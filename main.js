@@ -85,11 +85,7 @@ Life = _.extends (Viewport, {
 			var container = $('.viewport-container')
 			var width = container.width (),
 				height = container.height ()
-			if (width >= this.cellBuffer.width && height >= this.cellBuffer.height) {
-				this.resize (this.cellBuffer.width, this.cellBuffer.height)
-			} else {
-				this.resize (width, height)
-			}
+			this.resize (width, height)
 		}, this)).resize ()
 	},
 	eventPoint: function (e) {
@@ -177,14 +173,10 @@ Life = _.extends (Viewport, {
 		var viewportTransform = new Transform ()
 		var aspect = this.viewportWidth / this.viewportHeight
 		var bufferAspect = this.cellBuffer.width / this.cellBuffer.height
-		if (this.cellBuffer.width < this.viewportWidth && this.cellBuffer.height < this.viewportHeight) {
-			viewportTransform = viewportTransform.scale ([
-				this.cellBuffer.width / this.viewportWidth,
-				this.cellBuffer.height / this.viewportHeight, 1.0])
+		if (aspect > bufferAspect) {
+			viewportTransform = viewportTransform.scale ([1.0, aspect / bufferAspect, 1.0])
 		} else {
-			viewportTransform = viewportTransform.scale (this.cellBuffer.width > this.cellBuffer.height
-				? [1.0, aspect / bufferAspect, 1.0]
-				: [bufferAspect / aspect, 1.0, 1.0])
+			viewportTransform = viewportTransform.scale ([bufferAspect / aspect, 1.0, 1.0])
 		}
 		this.transform = newTransform || this.transform
 		this.screenTransform = this.transform.multiply (viewportTransform)
