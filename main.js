@@ -133,12 +133,10 @@ Life = _.extends (Viewport, {
 	},
 	onPaintStart: function (e) {
 		this.paintFrom = this.paintTo = this.eventPoint (e)
-		this.eraseMode = e.shiftKey
 		this.shouldPaint = true
 		this.isPainting = true
 		var onMousemove = $.proxy (function (e) {
 			this.paintTo = this.eventPoint (e)
-			this.eraseMode = e.shiftKey
 			this.shouldPaint = true
 		}, this)
 		$(this.canvas).bind('mousemove touchmove', onMousemove)
@@ -245,7 +243,7 @@ Life = _.extends (Viewport, {
 			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize))
 			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ())
 			this.parametricBrushShader.uniforms.noise.set1i (1.0)
-			this.parametricBrushShader.uniforms.fill.set1f (this.eraseMode ? 0.0 : 1.0)
+			this.parametricBrushShader.uniforms.fill.set1f (1.0)
 			this.parametricBrushShader.uniforms.animate.set1i (animate ? 1 : 0)
 		    this.square.draw ()
 		})
