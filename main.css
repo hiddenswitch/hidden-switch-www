@@ -8,6 +8,7 @@ body, html {
 	-webkit-box-orient: vertical; -moz-box-orient: vertical; -o-box-orient: vertical; -ms-box-orient: vertical; box-orient: vertical;
 	-webkit-box-align: center; -moz-box-align: center; -o-box-align: center; -ms-box-align: center; box-align: center;
 	-webkit-box-pack: center; -moz-box-pack: center; -o-box-pack: center; -ms-box-pack: center; box-pack: center;
+	position: fixed;
 }
 
 .viewport-container .viewport { display: block; }
