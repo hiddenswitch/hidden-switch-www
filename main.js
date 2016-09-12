@@ -4,8 +4,8 @@
 
 Life = _.extends (Viewport, {
 	init: function () {
-		var bufferWidth = Math.min(1024, Math.pow(2, Math.ceil(Math.log2(window.innerWidth))))
-		var bufferHeight = Math.min(512, Math.pow(2, Math.ceil(Math.log2(window.innerHeight))))
+		var bufferWidth = Math.min(1024, Math.pow(2, Math.ceil(Math.log2(window.innerWidth))));
+		var bufferHeight = Math.min(512, Math.pow(2, Math.ceil(Math.log2(window.innerHeight))));
 		_.extend (this, {
 			/* shaders */
 			randomNoiseShader: this.shaderProgram ({
@@ -61,9 +61,9 @@ Life = _.extends (Viewport, {
 			maxZoom: 8.0,
 			/* other stuff */
 			firstFrame: true
-		})
-		this.cellBuffer = this.cellBuffer1
-		this.fillWithRandomNoise ()
+		});
+		this.cellBuffer = this.cellBuffer1;
+		this.fillWithRandomNoise ();
 		this.initUserInput ()
 	},
 	genRulesBufferData: function (input) {
@@ -72,34 +72,34 @@ Life = _.extends (Viewport, {
 		})))
 	},
 	initUserInput: function () {
-		$(this.canvas).mousewheel ($.proxy (this.onZoom, this))
+		$(this.canvas).mousewheel ($.proxy (this.onZoom, this));
 		$(this.canvas).bind('mouseenter touchstart', $.proxy (function (e) {
 			this.onPaintStart (e)
-		}, this))
+		}, this));
 		$(this.canvas).mousedown ($.proxy (function (e) {
 			if (e.which === 1) {
 				this.onDragStart (e)
 			}
-		}, this))
+		}, this));
 		$(window).resize ($.proxy (function () {
-			var container = $('.viewport-container')
+			var container = $('.viewport-container');
 			var width = container.width (),
-				height = container.height ()
+				height = container.height ();
 			this.resize (width, height)
 		}, this)).resize ()
 	},
 	eventPoint: function (e) {
-		var offset = $(this.canvas).offset ()
-		var clientX = e.clientX || (e.originalEvent.touches && e.originalEvent.touches[0].clientX)
-		var clientY = e.clientY || (e.originalEvent.touches && e.originalEvent.touches[0].clientY)
+		var offset = $(this.canvas).offset ();
+		var clientX = e.clientX || (e.originalEvent.touches && e.originalEvent.touches[0].clientX);
+		var clientY = e.clientY || (e.originalEvent.touches && e.originalEvent.touches[0].clientY);
 		return [
 			(clientX - offset.left) / (this.viewportWidth * 0.5) - 1.0,
 			(offset.top - clientY) / (this.viewportHeight * 0.5) + 1.0, 0.0]
 	},
 	onZoom: function (e) {
 		var zoom = Math.pow (1.03, e.originalEvent.wheelDelta ?
-			(e.originalEvent.wheelDelta / (navigator.platform == 'MacIntel' ? 360.0 : 36.0)) : -e.originalEvent.detail)
-		var origin = this.transform.applyInverse (this.eventPoint (e))
+			(e.originalEvent.wheelDelta / (navigator.platform == 'MacIntel' ? 360.0 : 36.0)) : -e.originalEvent.detail);
+		var origin = this.transform.applyInverse (this.eventPoint (e));
 		if (zoom < 1 || this.getZoom() < this.maxZoom) {
 			this.updateTransform (this.transform.multiply (new Transform ()
 				.translate (origin)
@@ -113,50 +113,50 @@ Life = _.extends (Viewport, {
 				this.transform.apply ([1, 0, 0])))
 	},
 	onDragStart: function (e) {
-		this.isDragging = true
-		var origin = this.transform.applyInverse (this.eventPoint (e))
+		this.isDragging = true;
+		var origin = this.transform.applyInverse (this.eventPoint (e));
 		var onMousemove = $.proxy (function (e) {
-			var point = this.transform.applyInverse (this.eventPoint (e))
+			var point = this.transform.applyInverse (this.eventPoint (e));
 			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
 		}, this);
-		$(window).bind('mousemove touchmove', onMousemove)
+		$(window).bind('mousemove touchmove', onMousemove);
 		var onMouseup = $.proxy (function () {
-			this.isDragging = false
-			$(window).unbind ('mouseup touchend', onMouseup)
+			this.isDragging = false;
+			$(window).unbind ('mouseup touchend', onMouseup);
 			$(window).unbind ('mousemove touchmove', onMousemove)
-		}, this)
+		}, this);
 		$(window).bind('mouseup touchend', onMouseup)
 	},
 	onPaintStart: function (e) {
-		this.paintFrom = this.paintTo = this.eventPoint (e)
-		this.shouldPaint = true
-		this.isPainting = true
+		this.paintFrom = this.paintTo = this.eventPoint (e);
+		this.shouldPaint = true;
+		this.isPainting = true;
 		var onMousemove = $.proxy (function (e) {
-			this.paintTo = this.eventPoint (e)
+			this.paintTo = this.eventPoint (e);
 			this.shouldPaint = true
-		}, this)
-		$(this.canvas).bind('mousemove touchmove', onMousemove)
+		}, this);
+		$(this.canvas).bind('mousemove touchmove', onMousemove);
 		$(this.canvas).bind('mouseleave touchend', $.proxy (function (e) {
 			$(this.canvas).unbind ('mousemove touchmove', onMousemove)
 		}, this))
 	},
 	fillWithRandomNoise: function () {
 		this.cellBuffer.draw (function () {
-			this.randomNoiseShader.use ()
-			this.randomNoiseShader.attributes.position.bindBuffer (this.square)
-			this.randomNoiseShader.uniforms.seed.set2f (Math.random (), Math.random ())
+			this.randomNoiseShader.use ();
+			this.randomNoiseShader.attributes.position.bindBuffer (this.square);
+			this.randomNoiseShader.uniforms.seed.set2f (Math.random (), Math.random ());
 			this.square.draw ()
-		}, this)
+		}, this);
 		this.firstFrame = true
 	},
 	springDynamics: function () {
-		var zoom = this.getZoom ()
+		var zoom = this.getZoom ();
 		if (!this.isDragging) {
 			if (zoom > 0.99) {
-				var center = this.transform.apply ([0, 0, 0])
+				var center = this.transform.apply ([0, 0, 0]);
 				var springForce = [
 					(Math.max (0, Math.abs(center[0]) - (zoom - 1))) / zoom,
-					(Math.max (0, Math.abs(center[1]) - (zoom - 1))) / zoom]
+					(Math.max (0, Math.abs(center[1]) - (zoom - 1))) / zoom];
 				this.updateTransform (this.transform.translate ([
 					(Math.pow (1.2, springForce[0]) - 1.0) * (center[0] > 0 ? -1 : 1),
 					(Math.pow (1.2, springForce[1]) - 1.0) * (center[1] > 0 ? -1 : 1), 0.0]))
@@ -165,20 +165,20 @@ Life = _.extends (Viewport, {
 			}
 		}
 		if (zoom < 1.0) {
-			var springForce = Math.pow (1.2, 1.0 - zoom)
+			var springForce = Math.pow (1.2, 1.0 - zoom);
 			this.updateTransform (this.transform.scale ([springForce, springForce, 1.0]))
 		}
 	},
 	updateTransform: function (newTransform) {
-		var viewportTransform = new Transform ()
-		var aspect = this.viewportWidth / this.viewportHeight
-		var bufferAspect = this.cellBuffer.width / this.cellBuffer.height
+		var viewportTransform = new Transform ();
+		var aspect = this.viewportWidth / this.viewportHeight;
+		var bufferAspect = this.cellBuffer.width / this.cellBuffer.height;
 		if (aspect > bufferAspect) {
 			viewportTransform = viewportTransform.scale ([1.0, aspect / bufferAspect, 1.0])
 		} else {
 			viewportTransform = viewportTransform.scale ([bufferAspect / aspect, 1.0, 1.0])
 		}
-		this.transform = newTransform || this.transform
+		this.transform = newTransform || this.transform;
 		this.screenTransform = this.transform.multiply (viewportTransform)
 	},
 	beforeDraw: function () {
@@ -191,68 +191,68 @@ Life = _.extends (Viewport, {
 	},
 	renderCells: function (callback) {
 		/* backbuffering */
-		var targetBuffer = (this.cellBuffer == this.cellBuffer1 ? this.cellBuffer2 : this.cellBuffer1)
-		targetBuffer.draw (callback, this)
-		this.cellBuffer = targetBuffer
+		var targetBuffer = (this.cellBuffer == this.cellBuffer1 ? this.cellBuffer2 : this.cellBuffer1);
+		targetBuffer.draw (callback, this);
+		this.cellBuffer = targetBuffer;
 		this.firstFrame = false
 	},
 	iterate: function () {
 		this.renderCells (function () {
-			this.iterationShader.use ()
-			this.iterationShader.attributes.position.bindBuffer (this.square)
-			this.iterationShader.uniforms.previousStep.bindTexture (this.cellBuffer, 0)
-			this.iterationShader.uniforms.rules.bindTexture (this.rulesBuffer, 1)
-			this.iterationShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
+			this.iterationShader.use ();
+			this.iterationShader.attributes.position.bindBuffer (this.square);
+			this.iterationShader.uniforms.previousStep.bindTexture (this.cellBuffer, 0);
+			this.iterationShader.uniforms.rules.bindTexture (this.rulesBuffer, 1);
+			this.iterationShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height);
 			this.iterationShader.uniforms.pixelOffset.set2f (
 				0.0 / this.cellBuffer.width,
-				-0.5 / this.cellBuffer.height)
+				-0.5 / this.cellBuffer.height);
 		    this.square.draw ()
 		})
 	},
 	paint: function (animate) {
-		this.paintParametricBrush (animate)
-		this.paintFrom = this.paintTo
+		this.paintParametricBrush (animate);
+		this.paintFrom = this.paintTo;
 		this.shouldPaint = false
 	},
 	paintParametricBrush: function (animate) {
 		this.renderCells (function () {
 			var pixelSpace = new Transform ()
 				.scale ([this.viewportWidth, this.viewportHeight, 1.0])
-				.multiply (this.screenTransform)
+				.multiply (this.screenTransform);
 			var texelSize =
 				pixelSpace.apply ([0,0,0])[0] -
-				pixelSpace.apply ([-1.0 / this.cellBuffer.width, 0, 0])[0]
-			this.parametricBrushShader.use ()
-			this.parametricBrushShader.attributes.position.bindBuffer (this.square)
-			this.parametricBrushShader.uniforms.cells.bindTexture (this.cellBuffer, 0)
-			this.parametricBrushShader.uniforms.rules.bindTexture (this.rulesBuffer, 1)
-			this.parametricBrushShader.uniforms.brushPosition1.set2fv (this.screenTransform.applyInverse (this.paintFrom))
-			this.parametricBrushShader.uniforms.brushPosition2.set2fv (this.screenTransform.applyInverse (this.paintTo))
-			this.parametricBrushShader.uniforms.pixelSpace.setMatrix (pixelSpace)
+				pixelSpace.apply ([-1.0 / this.cellBuffer.width, 0, 0])[0];
+			this.parametricBrushShader.use ();
+			this.parametricBrushShader.attributes.position.bindBuffer (this.square);
+			this.parametricBrushShader.uniforms.cells.bindTexture (this.cellBuffer, 0);
+			this.parametricBrushShader.uniforms.rules.bindTexture (this.rulesBuffer, 1);
+			this.parametricBrushShader.uniforms.brushPosition1.set2fv (this.screenTransform.applyInverse (this.paintFrom));
+			this.parametricBrushShader.uniforms.brushPosition2.set2fv (this.screenTransform.applyInverse (this.paintTo));
+			this.parametricBrushShader.uniforms.pixelSpace.setMatrix (pixelSpace);
 			this.parametricBrushShader.uniforms.pixelOffset.set2f (0.0,
-				animate ? (-0.5 / this.cellBuffer.height) : 0.0)
-			this.parametricBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height)
-			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize))
-			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ())
-			this.parametricBrushShader.uniforms.noise.set1i (1.0)
-			this.parametricBrushShader.uniforms.fill.set1f (1.0)
-			this.parametricBrushShader.uniforms.animate.set1i (animate ? 1 : 0)
+				animate ? (-0.5 / this.cellBuffer.height) : 0.0);
+			this.parametricBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height);
+			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize));
+			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ());
+			this.parametricBrushShader.uniforms.noise.set1i (1.0);
+			this.parametricBrushShader.uniforms.fill.set1f (1.0);
+			this.parametricBrushShader.uniforms.animate.set1i (animate ? 1 : 0);
 		    this.square.draw ()
 		})
 	},
 	draw: function () {
-		this.gl.disable (this.gl.DEPTH_TEST)
-		this.gl.clear (this.gl.COLOR_BUFFER_BIT)
-		this.drawCellsShader.use ()
-		this.drawCellsShader.attributes.position.bindBuffer (this.square)
-		this.drawCellsShader.uniforms.transform.setMatrix (this.screenTransform)
-		this.drawCellsShader.uniforms.cells.bindTexture (this.cellBuffer, 0)
+		this.gl.disable (this.gl.DEPTH_TEST);
+		this.gl.clear (this.gl.COLOR_BUFFER_BIT);
+		this.drawCellsShader.use ();
+		this.drawCellsShader.attributes.position.bindBuffer (this.square);
+		this.drawCellsShader.uniforms.transform.setMatrix (this.screenTransform);
+		this.drawCellsShader.uniforms.cells.bindTexture (this.cellBuffer, 0);
 		this.square.draw ()
 	}
-})
+});
 
 $(document).ready (function () {
 	var life = new Life ({
 		canvas: $('.viewport').get (0)
 	})
-})
+});
