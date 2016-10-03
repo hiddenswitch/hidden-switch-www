@@ -73,13 +73,8 @@ Life = _.extends (Viewport, {
 	},
 	initUserInput: function () {
 		$(this.canvas).mousewheel ($.proxy (this.onZoom, this));
-		$(this.canvas).bind('mouseenter touchstart', $.proxy (function (e) {
+		$(this.canvas).bind('mousedown touchstart', $.proxy (function (e) {
 			this.onPaintStart (e)
-		}, this));
-		$(this.canvas).mousedown ($.proxy (function (e) {
-			if (e.which === 1) {
-				this.onDragStart (e)
-			}
 		}, this));
 		$(window).resize ($.proxy (function () {
 			var container = $('.viewport-container');
@@ -112,31 +107,15 @@ Life = _.extends (Viewport, {
 				this.transform.apply ([0, 0, 0]),
 				this.transform.apply ([1, 0, 0])))
 	},
-	onDragStart: function (e) {
-		this.isDragging = true;
-		var origin = this.transform.applyInverse (this.eventPoint (e));
-		var onMousemove = $.proxy (function (e) {
-			var point = this.transform.applyInverse (this.eventPoint (e));
-			this.updateTransform (this.transform.translate ([point[0] - origin[0], point[1] - origin[1], 0.0]))
-		}, this);
-		$(window).bind('mousemove touchmove', onMousemove);
-		var onMouseup = $.proxy (function () {
-			this.isDragging = false;
-			$(window).unbind ('mouseup touchend', onMouseup);
-			$(window).unbind ('mousemove touchmove', onMousemove)
-		}, this);
-		$(window).bind('mouseup touchend', onMouseup)
-	},
 	onPaintStart: function (e) {
 		this.paintFrom = this.paintTo = this.eventPoint (e);
 		this.shouldPaint = true;
-		this.isPainting = true;
 		var onMousemove = $.proxy (function (e) {
 			this.paintTo = this.eventPoint (e);
 			this.shouldPaint = true
 		}, this);
 		$(this.canvas).bind('mousemove touchmove', onMousemove);
-		$(this.canvas).bind('mouseleave touchend', $.proxy (function (e) {
+		$(this.canvas).bind('mouseup touchend', $.proxy (function (e) {
 			$(this.canvas).unbind ('mousemove touchmove', onMousemove)
 		}, this))
 	},
