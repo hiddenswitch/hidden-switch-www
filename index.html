@@ -160,7 +160,7 @@
 		    	vec4 cell = texture2D (cells, texCoord);
 		    	if (cell.x < 0.5) {
 		    		if (cell.z > 0.5) {
-		    			gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0);
+		    			gl_FragColor = vec4 (0.0, 1.0, 0.0, 1.0);
 		    		} else {
 		    			gl_FragColor = vec4 (0.0, cell.y, cell.z, 1.0);
 		    		}
