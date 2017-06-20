@@ -4,8 +4,8 @@
 
 Life = _.extends (Viewport, {
 	init: function () {
-		var bufferWidth = Math.min(1024, Math.pow(2, Math.ceil(Math.log2(window.innerWidth))));
-		var bufferHeight = Math.min(512, Math.pow(2, Math.ceil(Math.log2(window.innerHeight))));
+		var bufferWidth = Math.min(512, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerWidth))), 1024));
+		var bufferHeight = Math.min(256, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerHeight))), 1024));
 		_.extend (this, {
 			/* shaders */
 			randomNoiseShader: this.shaderProgram ({
@@ -63,8 +63,14 @@ Life = _.extends (Viewport, {
 			firstFrame: true
 		});
 		this.cellBuffer = this.cellBuffer1;
-		this.fillWithRandomNoise ();
-		this.initUserInput ()
+		this.fillWithRandomNoise (true);
+		this.initUserInput ();
+
+        // Fill with random noise every 18 seconds
+        var self = this;
+        this.interval = window.setInterval(function() {
+            self.fillWithRandomNoise (false);
+        }, 18000);
 	},
 	genRulesBufferData: function (input) {
 		return new Uint8Array (_.flatten (_.map (input, function (i) {
@@ -119,14 +125,14 @@ Life = _.extends (Viewport, {
 			$(this.canvas).unbind ('mousemove touchmove', onMousemove)
 		}, this))
 	},
-	fillWithRandomNoise: function () {
+	fillWithRandomNoise: function (firstFrame) {
 		this.cellBuffer.draw (function () {
 			this.randomNoiseShader.use ();
 			this.randomNoiseShader.attributes.position.bindBuffer (this.square);
 			this.randomNoiseShader.uniforms.seed.set2f (Math.random (), Math.random ());
 			this.square.draw ()
 		}, this);
-		this.firstFrame = true
+		this.firstFrame = firstFrame;
 	},
 	springDynamics: function () {
 		var zoom = this.getZoom ();
