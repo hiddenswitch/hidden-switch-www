@@ -4,8 +4,8 @@
 
 Life = _.extends (Viewport, {
 	init: function () {
-		var bufferWidth = Math.min(512, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerWidth))), 1024));
-		var bufferHeight = Math.min(256, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerHeight))), 1024));
+		var bufferWidth = Math.min(1024, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerWidth))), 2048));
+		var bufferHeight = Math.min(512, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerHeight))), 2048));
 		_.extend (this, {
 			/* shaders */
 			randomNoiseShader: this.shaderProgram ({
@@ -57,6 +57,7 @@ Life = _.extends (Viewport, {
 			transform: new Transform (),
 			screenTransform: new Transform (),
 			/* changeable parameters */
+            scrollSpeed: 2.0,
 			brushSize: 16.0,
 			maxZoom: 8.0,
 			/* other stuff */
@@ -65,12 +66,6 @@ Life = _.extends (Viewport, {
 		this.cellBuffer = this.cellBuffer1;
 		this.fillWithRandomNoise (true);
 		this.initUserInput ();
-
-        // Fill with random noise every 18 seconds
-        var self = this;
-        this.interval = window.setInterval(function() {
-            self.fillWithRandomNoise (false);
-        }, 18000);
 	},
 	genRulesBufferData: function (input) {
 		return new Uint8Array (_.flatten (_.map (input, function (i) {
@@ -190,7 +185,7 @@ Life = _.extends (Viewport, {
 			this.iterationShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height);
 			this.iterationShader.uniforms.pixelOffset.set2f (
 				0.0 / this.cellBuffer.width,
-				-0.5 / this.cellBuffer.height);
+                -(0.5 + this.scrollSpeed * !this.firstFrame) / this.cellBuffer.height);
 		    this.square.draw ()
 		})
 	},
@@ -215,7 +210,7 @@ Life = _.extends (Viewport, {
 			this.parametricBrushShader.uniforms.brushPosition2.set2fv (this.screenTransform.applyInverse (this.paintTo));
 			this.parametricBrushShader.uniforms.pixelSpace.setMatrix (pixelSpace);
 			this.parametricBrushShader.uniforms.pixelOffset.set2f (0.0,
-				animate ? (-0.5 / this.cellBuffer.height) : 0.0);
+                animate ? (-(0.5 + this.scrollSpeed * !this.firstFrame) / this.cellBuffer.height) : 0.0);
 			this.parametricBrushShader.uniforms.screenSpace.set2f (1.0 / this.cellBuffer.width, 1.0 / this.cellBuffer.height);
 			this.parametricBrushShader.uniforms.brushSize.set1f (Math.max (this.brushSize, texelSize));
 			this.parametricBrushShader.uniforms.seed.set2f (Math.random (), Math.random ());
