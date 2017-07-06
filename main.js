@@ -4,8 +4,8 @@
 
 Life = _.extends (Viewport, {
 	init: function () {
-		var bufferWidth = Math.min(1024, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerWidth))), 2048));
-		var bufferHeight = Math.min(512, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerHeight))), 2048));
+		var bufferWidth = Math.min(1024, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerWidth))), 1024));
+		var bufferHeight = Math.min(512, Math.max(Math.pow(2, Math.ceil(Math.log2(window.innerHeight))), 1024));
 		_.extend (this, {
 			/* shaders */
 			randomNoiseShader: this.shaderProgram ({
